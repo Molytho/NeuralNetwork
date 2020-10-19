@@ -1,0 +1,4 @@
+[submodule "extern/Matrix"]
+	path = extern/Matrix
+	url = https://github.com/Molytho/Matrix.git
+	branch = intrinsics
