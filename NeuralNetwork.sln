@@ -5,6 +5,10 @@ VisualStudioVersion = 16.0.30517.126
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NeuralNetwork", "NeuralNetwork\NeuralNetwork.csproj", "{00914AED-DEEE-4CA5-B880-FD4C3C66DB85}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "extern", "extern", "{2A98A3EB-72E4-4926-BA35-B383F5D973C7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Matrix", "extern\Matrix\Matrix\Matrix.csproj", "{071F104D-C052-476B-8E8D-79EA667E6CFA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +19,16 @@ Global
 		{00914AED-DEEE-4CA5-B880-FD4C3C66DB85}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00914AED-DEEE-4CA5-B880-FD4C3C66DB85}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00914AED-DEEE-4CA5-B880-FD4C3C66DB85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{071F104D-C052-476B-8E8D-79EA667E6CFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{071F104D-C052-476B-8E8D-79EA667E6CFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{071F104D-C052-476B-8E8D-79EA667E6CFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{071F104D-C052-476B-8E8D-79EA667E6CFA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{071F104D-C052-476B-8E8D-79EA667E6CFA} = {2A98A3EB-72E4-4926-BA35-B383F5D973C7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8FFED1D0-B242-4A16-8A4E-D478F300BFC8}
