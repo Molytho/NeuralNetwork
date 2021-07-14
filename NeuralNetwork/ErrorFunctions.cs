@@ -7,10 +7,10 @@ namespace Molytho.NeuralNetwork.Training
 
     namespace ErrorFunctions
     {
-        class MSE
+        static class MSE
         {
-            public ErrorFunctionGradient Default => Calculate;
-            private Vector<double> Calculate(Vector<double> actual, Vector<double> expected)
+            public static ErrorFunctionGradient Default => Calculate;
+            private static Vector<double> Calculate(Vector<double> actual, Vector<double> expected)
             {
                 Vector<double> ret = new Vector<double>(actual.Dimension);
 

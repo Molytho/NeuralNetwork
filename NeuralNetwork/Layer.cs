@@ -9,8 +9,9 @@ namespace Molytho.NeuralNetwork
         private readonly ActivationFunction activationFunction;
 
         public VectorFunction ActivationFunction => activationFunction.Function;
-        public VectorFunction ActicationDifferential => activationFunction.Differential;
+        public VectorFunction ActivationDifferential => activationFunction.Differential;
         public int NodeCount => weight.Height;
+        public Matrix<double> Weights => weight;
 
         public Layer(ActivationFunction activationFunction, int inputSize, int outputSize)
         {
