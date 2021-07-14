@@ -3,7 +3,7 @@ using Molytho.Matrix;
 
 namespace Molytho.NeuralNetwork
 {
-    class Layer
+    public class Layer
     {
         private readonly Matrix<double> weight;
         private readonly ActivationFunction activationFunction;

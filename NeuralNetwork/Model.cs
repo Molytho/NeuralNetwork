@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+
 using Molytho.Matrix;
+using Molytho.NeuralNetwork.Training;
 
 namespace Molytho.NeuralNetwork
 {
@@ -8,6 +10,7 @@ namespace Molytho.NeuralNetwork
     {
         private readonly LinkedList<Layer> layers = new LinkedList<Layer>();
         private readonly int inSize;
+        private readonly TrainCallback trainFunction;
 
         private LinkedListNode<Layer>? First => layers.First;
         private LinkedListNode<Layer>? Last => layers.Last;
@@ -15,9 +18,9 @@ namespace Molytho.NeuralNetwork
         private State state;
 
         public bool IsTrainable { get; }
-        public Model(int inSize)
+        public Model(int inSize, TrainCallback trainFunc)
         {
-            #error This is nonsense without a trainings function
+            this.trainFunction = trainFunc;
             this.inSize = inSize;
             state = State.Creation;
         }
@@ -33,7 +36,7 @@ namespace Molytho.NeuralNetwork
             layers.AddLast(newLayer);
         }
 
-        public Vector<double> Run(Vector<double> inValues)
+        private void CheckState()
         {
             if (state == State.Creation)
             {
@@ -42,6 +45,10 @@ namespace Molytho.NeuralNetwork
                 else
                     throw new InvalidOperationException();
             }
+        }
+        public Vector<double> Run(Vector<double> inValues)
+        {
+            CheckState();
 
             Vector<double> temp = inValues;
             LinkedListNode<Layer> current = First!;
@@ -57,6 +64,30 @@ namespace Molytho.NeuralNetwork
             }
 
             return temp;
+        }
+        public void Train(Vector<double> input, Vector<double> output)
+        {
+            CheckState();
+
+            LinkedList<LayerTrainData> trainData = new LinkedList<LayerTrainData>();
+            Vector<double> @in = input, inter, @out;
+            LinkedListNode<Layer> current = First!;
+
+            while (true)
+            {
+                Layer layer = current.Value;
+                @out = layer.Calculate(@in, out inter);
+
+                LayerTrainData layerData = new LayerTrainData(layer, @in, inter, @out);
+                trainData.AddLast(layerData);
+
+                if (current.Next != null)
+                    current = current.Next;
+                else
+                    break;
+            }
+
+            trainFunction(trainData, output);
         }
 
         private enum State

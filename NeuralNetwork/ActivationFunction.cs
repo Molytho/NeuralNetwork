@@ -3,8 +3,8 @@ using Molytho.Matrix;
 
 namespace Molytho.NeuralNetwork
 {
-    delegate Vector<Double> VectorFunction(Vector<Double> values);
-    record ActivationFunction(VectorFunction Function, VectorFunction Differential);
+    public delegate Vector<Double> VectorFunction(Vector<Double> values);
+    public record ActivationFunction(VectorFunction Function, VectorFunction Differential);
 
     namespace ActivationFunctions
     {
