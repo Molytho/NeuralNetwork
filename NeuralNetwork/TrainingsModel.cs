@@ -14,8 +14,8 @@ namespace Molytho.NeuralNetwork.Training
         {
             LinkedListNode<LayerTrainData> current = data.Last ?? throw new ArgumentException(nameof(data));
             Vector<double> auxiliaryQuantity =
-                errorFunction(current.Value.Output, expected)
-                    .MultiplyForEach(current.Value.Layer.ActivationDifferential(current.Value.Intermediate));
+                  errorFunction(current.Value.Output, expected)
+                * current.Value.Layer.ActivationDifferential(current.Value.Intermediate);
 
             while (true)
             {
@@ -28,7 +28,7 @@ namespace Molytho.NeuralNetwork.Training
                         transformationMatrix = current.Value.Layer.Weights.RemoveBias();
                     else
                         transformationMatrix = current.Value.Layer.Weights;
-                    auxiliaryQuantity = (transformationMatrix.Transpose * auxiliaryQuantity).MultiplyForEach(current.Previous.Value.Layer.ActivationDifferential(current.Previous.Value.Intermediate));
+                    auxiliaryQuantity = (transformationMatrix.Transpose * auxiliaryQuantity) * current.Previous.Value.Layer.ActivationDifferential(current.Previous.Value.Intermediate);
                 }
 
                 current.Value.Layer.Weights.Add(-learningRate * gradWeights);
