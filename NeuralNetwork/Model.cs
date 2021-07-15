@@ -10,29 +10,32 @@ namespace Molytho.NeuralNetwork
     {
         private readonly LinkedList<Layer> layers = new LinkedList<Layer>();
         private readonly int inSize;
-        private readonly TrainCallback trainFunction;
+        private readonly TrainCallback? trainFunction;
 
         private LinkedListNode<Layer>? First => layers.First;
         private LinkedListNode<Layer>? Last => layers.Last;
 
         private State state;
 
-        public bool IsTrainable { get; }
-        public Model(int inSize, TrainCallback trainFunc)
+        public bool IsTrainable => trainFunction is not null;
+        public Model(int inSize, TrainCallback? trainFunc = null)
         {
             this.trainFunction = trainFunc;
             this.inSize = inSize;
             state = State.Creation;
         }
 
-        public Model AddLayer(int nodeCount, bool bias = true)
+        public Model AddLayer(int nodeCount, bool bias = true, ActivationFunction? activationFunction = null)
         {
             if (state != State.Creation)
                 throw new InvalidOperationException();
+            
+            if(activationFunction is null)
+                activationFunction = ActivationFunctions.LogisticFunction.Default;
 
             int inSize = Last?.Value.NodeCount ?? this.inSize;
             int outSize = nodeCount;
-            Layer newLayer = new Layer(ActivationFunctions.LogisticFunction.Default, inSize, outSize, bias);
+            Layer newLayer = new Layer(activationFunction, inSize, outSize, bias);
             layers.AddLast(newLayer);
 
             return this;
@@ -70,6 +73,9 @@ namespace Molytho.NeuralNetwork
         }
         public void Train(Vector<double> input, Vector<double> output)
         {
+            if(!IsTrainable)
+                throw new InvalidOperationException();
+
             CheckState();
 
             LinkedList<LayerTrainData> trainData = new LinkedList<LayerTrainData>();
@@ -92,7 +98,7 @@ namespace Molytho.NeuralNetwork
                     break;
             }
 
-            trainFunction(trainData, output);
+            trainFunction!(trainData, output);
         }
 
         private enum State

@@ -14,32 +14,34 @@ namespace Molytho.NeuralNetwork.Training
         public static TrainCallback Default = (data, expected) => Impl(data, expected, ErrorFunctions.MSE.Default, 0.5);
         internal static void Impl(LinkedList<LayerTrainData> data, Vector<double> expected, ErrorFunctionGradient errorFunction, double learningRate)
         {
-            LinkedListNode<LayerTrainData> current = data.Last ?? throw new ArgumentException(nameof(data));
-            Vector<double> auxiliaryQuantity =
-                  errorFunction(current.Value.Output, expected)
-                * current.Value.Layer.ActivationDifferential(current.Value.Intermediate);
+            LinkedListNode<LayerTrainData>? current = data.Last ?? throw new ArgumentException(nameof(data));
+            Vector<double> auxiliaryQuantity =                                              //Recursivly defined as: l = index of layer (0 <= l <= L)
+                                                                                            //auxiliaryQuantity_l-1 = f'_l-1 * W_l * auxiliaryQuantity_l
+                                                                                            //First instance auxiliaryQuantity_L = f' * ∇C
+                  current.Value.Layer.ActivationDifferential(current.Value.Intermediate)    //This is f'
+                * errorFunction(current.Value.Output, expected);                            //This is ∇C
 
-            while (true)
+            do
             {
-                MatrixBase<double> gradWeights = auxiliaryQuantity * current.Value.Input.Transpose;
-
+                LayerTrainData currentLayer = current.Value;
+                MatrixBase<double> gradWeights = auxiliaryQuantity * currentLayer.Input.Transpose;  //The chain rule of backpropagation is
+                                                                                                    //Δw_ij = -n * auxiliaryQuantity_j * ∂net_j/∂w_ij
+                                                                                                    //∂net_j/∂w_ij = o_j
+                                                                                                    //which is just input of the layer
                 if (current.Previous != null)
                 {
-                    Matrix<double> transformationMatrix;
-                    if (current.Value.Layer.HasBiasNode)
-                        transformationMatrix = ((Matrix<double>)current.Value.Layer.Weights.Transpose).RemoveBiasFromTranspose();
-                    else
-                        transformationMatrix = (Matrix<double>)current.Value.Layer.Weights.Transpose;
-                    auxiliaryQuantity = (transformationMatrix * auxiliaryQuantity) * current.Previous.Value.Layer.ActivationDifferential(current.Previous.Value.Intermediate);
+                    LayerTrainData previosLayer = previosLayer = current.Previous.Value;
+                    Matrix<double> transformationMatrix =
+                        currentLayer.Layer.HasBiasNode
+                        ? transformationMatrix = ((Matrix<double>)currentLayer.Layer.Weights.Transpose).RemoveBiasFromTranspose()
+                        : transformationMatrix = ((Matrix<double>)currentLayer.Layer.Weights.Transpose);
+
+                    //auxiliaryQuantity_l-1 = f'_l-1 * W_l * auxiliaryQuantity_l
+                    auxiliaryQuantity = previosLayer.Layer.ActivationDifferential(previosLayer.Intermediate) * (transformationMatrix * auxiliaryQuantity);
                 }
 
-                current.Value.Layer.Weights.Add(-learningRate * gradWeights);
-
-                if (current.Previous == null)
-                    break;
-
-                current = current.Previous;
-            }
+                currentLayer.Layer.Weights.Add(-learningRate * gradWeights); //We calculated the next layer so we can change weights now
+            } while ((current = current.Previous) != null);
         }
     }
 }

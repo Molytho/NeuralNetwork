@@ -31,7 +31,7 @@ namespace Molytho.NeuralNetwork
 
         public Vector<double> Calculate(ref Vector<double> inValue, out Vector<double> internValue)
         {
-            if(HasBiasNode)
+            if (HasBiasNode)
             {
                 double[] valueStorage = (double[])inValue;
                 Array.Resize(ref valueStorage, valueStorage.Length + 1);
