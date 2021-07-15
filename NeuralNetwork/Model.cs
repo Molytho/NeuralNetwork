@@ -25,15 +25,17 @@ namespace Molytho.NeuralNetwork
             state = State.Creation;
         }
 
-        public void AddLayer(int nodeCount)
+        public Model AddLayer(int nodeCount, bool bias = true)
         {
             if (state != State.Creation)
                 throw new InvalidOperationException();
 
             int inSize = Last?.Value.NodeCount ?? this.inSize;
             int outSize = nodeCount;
-            Layer newLayer = new Layer(ActivationFunctions.LogisticFunction.Default, inSize, outSize);
+            Layer newLayer = new Layer(ActivationFunctions.LogisticFunction.Default, inSize, outSize, bias);
             layers.AddLast(newLayer);
+
+            return this;
         }
 
         private void CheckState()
@@ -82,7 +84,7 @@ namespace Molytho.NeuralNetwork
                 LayerTrainData layerData = new LayerTrainData(layer, @in, inter, @out);
                 trainData.AddLast(layerData);
 
-                @out = @in;
+                @in = @out;
 
                 if (current.Next != null)
                     current = current.Next;
