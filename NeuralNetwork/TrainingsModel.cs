@@ -9,6 +9,8 @@ namespace Molytho.NeuralNetwork.Training
 
     public static class Train
     {
+        public static TrainCallback WithLearningRate(double learningRate)
+            => (data, expected) => Impl(data, expected, ErrorFunctions.MSE.Default, learningRate);
         public static TrainCallback Default = (data, expected) => Impl(data, expected, ErrorFunctions.MSE.Default, 0.5);
         internal static void Impl(LinkedList<LayerTrainData> data, Vector<double> expected, ErrorFunctionGradient errorFunction, double learningRate)
         {
@@ -25,10 +27,10 @@ namespace Molytho.NeuralNetwork.Training
                 {
                     Matrix<double> transformationMatrix;
                     if (current.Value.Layer.HasBiasNode)
-                        transformationMatrix = current.Value.Layer.Weights.RemoveBias();
+                        transformationMatrix = ((Matrix<double>)current.Value.Layer.Weights.Transpose).RemoveBiasFromTranspose();
                     else
-                        transformationMatrix = current.Value.Layer.Weights;
-                    auxiliaryQuantity = (transformationMatrix.Transpose * auxiliaryQuantity) * current.Previous.Value.Layer.ActivationDifferential(current.Previous.Value.Intermediate);
+                        transformationMatrix = (Matrix<double>)current.Value.Layer.Weights.Transpose;
+                    auxiliaryQuantity = (transformationMatrix * auxiliaryQuantity) * current.Previous.Value.Layer.ActivationDifferential(current.Previous.Value.Intermediate);
                 }
 
                 current.Value.Layer.Weights.Add(-learningRate * gradWeights);
