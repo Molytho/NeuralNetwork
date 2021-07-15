@@ -10,7 +10,7 @@ namespace Molytho.NeuralNetwork.Training
     static class Train
     {
         public static TrainCallback Default = (data, expected) => Impl(data, expected, ErrorFunctions.MSE.Default, 1);
-        public static void Impl(LinkedList<LayerTrainData> data, Vector<double> expected, ErrorFunctionGradient errorFunction, double lernFaktor)
+        public static void Impl(LinkedList<LayerTrainData> data, Vector<double> expected, ErrorFunctionGradient errorFunction, double learningRate)
         {
             LinkedListNode<LayerTrainData> current = data.Last ?? throw new ArgumentException(nameof(data));
             Vector<double> auxiliaryQuantity =
@@ -26,7 +26,7 @@ namespace Molytho.NeuralNetwork.Training
                     auxiliaryQuantity = (current.Value.Layer.Weights * auxiliaryQuantity).MultiplyForEach(current.Previous.Value.Layer.ActivationDifferential(current.Previous.Value.Intermediate));
                 }
 
-                current.Value.Layer.Weights.Add(-lernFaktor * gradWeights);
+                current.Value.Layer.Weights.Add(-learningRate * gradWeights);
 
                 if(current.Previous == null)
                     break;

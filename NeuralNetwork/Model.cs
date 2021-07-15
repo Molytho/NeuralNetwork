@@ -55,7 +55,8 @@ namespace Molytho.NeuralNetwork
             while (true)
             {
                 Layer layer = current.Value;
-                temp = layer.Calculate(temp, out var noOp); //noOp is only need for training
+                temp = layer.Calculate(ref temp, out var noOp); //noOp is only need for training
+                                                                //ref temp might be changed when the layer contains a bias but this doesn't matter
 
                 if (current.Next != null)
                     current = current.Next;
@@ -76,10 +77,12 @@ namespace Molytho.NeuralNetwork
             while (true)
             {
                 Layer layer = current.Value;
-                @out = layer.Calculate(@in, out inter);
+                @out = layer.Calculate(ref @in, out inter);
 
                 LayerTrainData layerData = new LayerTrainData(layer, @in, inter, @out);
                 trainData.AddLast(layerData);
+
+                @out = @in;
 
                 if (current.Next != null)
                     current = current.Next;
