@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
-
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Molytho.Matrix;
 using Molytho.NeuralNetwork.Training;
 
 namespace Molytho.NeuralNetwork
 {
+    [Serializable]
+    [JsonConverter(typeof(JsonModelConverter))]
     public class Model
     {
         private readonly LinkedList<Layer> layers = new LinkedList<Layer>();
@@ -24,13 +27,20 @@ namespace Molytho.NeuralNetwork
             this.inSize = inSize;
             state = State.Creation;
         }
+        private Model(int inSize, LinkedList<Layer> layers)
+        {
+            this.inSize = inSize;
+            this.layers = layers;
+            this.trainFunction = null;
+            state = State.Calculation;
+        }
 
         public Model AddLayer(int nodeCount, bool bias = true, ActivationFunction? activationFunction = null)
         {
             if (state != State.Creation)
                 throw new InvalidOperationException();
-            
-            if(activationFunction is null)
+
+            if (activationFunction is null)
                 activationFunction = ActivationFunctions.LogisticFunction.Default;
 
             int inSize = Last?.Value.NodeCount ?? this.inSize;
@@ -73,7 +83,7 @@ namespace Molytho.NeuralNetwork
         }
         public void Train(Vector<double> input, Vector<double> output)
         {
-            if(!IsTrainable)
+            if (!IsTrainable)
                 throw new InvalidOperationException();
 
             CheckState();
@@ -105,6 +115,79 @@ namespace Molytho.NeuralNetwork
         {
             Creation,
             Calculation
+        }
+
+        public class JsonModelConverter : JsonConverter<Model>
+        {
+            public override Model Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                if (reader.TokenType != JsonTokenType.StartObject)
+                    throw new JsonException();
+
+                int inSize = 0;
+                LinkedList<Layer>? layers = null;
+                while (reader.Read())
+                {
+                    if (reader.TokenType == JsonTokenType.EndObject)
+                    {
+                        if (inSize == 0
+                            || layers is null)
+                            throw new JsonException();
+
+                        return new Model(
+                            inSize,
+                            layers
+                        );
+                    }
+
+                    if (reader.TokenType != JsonTokenType.PropertyName)
+                        throw new JsonException();
+                    switch (reader.GetString())
+                    {
+                        case "InSize":
+                            reader.Read();
+                            inSize = reader.GetInt32();
+                            break;
+                        case "Layers":
+                            reader.Read();
+                            if (reader.TokenType != JsonTokenType.StartArray)
+                                throw new JsonException();
+                            layers = new LinkedList<Layer>();
+                            while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
+                            {
+                                Layer layer = JsonSerializer.Deserialize<Layer>(ref reader, options)
+                                    ?? throw new JsonException();
+                                layers.AddLast(layer);
+                            }
+                            break;
+                        default:
+                            throw new NotSupportedException();
+                    }
+                }
+                throw new JsonException();
+            }
+
+            public override void Write(Utf8JsonWriter writer, Model value, JsonSerializerOptions options)
+            {
+                writer.WriteStartObject();
+
+                writer.WriteNumber(
+                    options.PropertyNamingPolicy?.ConvertName("InSize") ?? "InSize",
+                    value.inSize
+                );
+                writer.WriteStartArray(
+                    options.PropertyNamingPolicy?.ConvertName("Layers") ?? "Layers"
+                );
+                LinkedListNode<Layer>? current = value.First ?? throw new NotSupportedException();
+                do
+                {
+                    JsonSerializer.Serialize(writer, current.Value, typeof(Layer), options);
+                }
+                while ((current = current.Next) != null);
+                writer.WriteEndArray();
+
+                writer.WriteEndObject();
+            }
         }
     }
 }
