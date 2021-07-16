@@ -15,17 +15,17 @@ namespace Molytho.NeuralNetwork
     {
         private readonly LinkedList<Layer> layers = new LinkedList<Layer>();
         private readonly int inSize;
-        private readonly TrainCallback? trainFunction;
 
         private LinkedListNode<Layer>? First => layers.First;
         private LinkedListNode<Layer>? Last => layers.Last;
 
         private State state;
 
-        public bool IsTrainable => trainFunction is not null;
+        public TrainCallback? TrainFunction { get; }
+        public bool IsTrainable => TrainFunction is not null;
         public Model(int inSize, TrainCallback? trainFunc = null)
         {
-            this.trainFunction = trainFunc;
+            this.TrainFunction = trainFunc;
             this.inSize = inSize;
             state = State.Creation;
         }
@@ -33,7 +33,7 @@ namespace Molytho.NeuralNetwork
         {
             this.inSize = inSize;
             this.layers = layers;
-            this.trainFunction = null;
+            this.TrainFunction = null;
             state = State.Calculation;
         }
 
@@ -110,7 +110,7 @@ namespace Molytho.NeuralNetwork
                     break;
             }
 
-            trainFunction!(trainData, output);
+            TrainFunction!(trainData, output);
         }
 
 
@@ -122,10 +122,10 @@ namespace Molytho.NeuralNetwork
             string json = JsonSerializer.Serialize(this);
             await writer.WriteAsync(json).ConfigureAwait(false);
 
-            if(dispose)
+            if (dispose)
                 await file.DisposeAsync().ConfigureAwait(false);
         }
-        public static Task<Model> LoadFromFileAsync(string fileName) => LoadFromFileAsync(new FileStream(fileName, FileMode.Open, FileAccess.Read) ,true);
+        public static Task<Model> LoadFromFileAsync(string fileName) => LoadFromFileAsync(new FileStream(fileName, FileMode.Open, FileAccess.Read), true);
         public static async Task<Model> LoadFromFileAsync(FileStream file, bool dispose = false)
         {
             using StreamReader reader = new StreamReader(file);
@@ -134,7 +134,7 @@ namespace Molytho.NeuralNetwork
             Model model = JsonSerializer.Deserialize<Model>(json)
                 ?? throw new JsonException("json data invalid");
 
-            if(dispose)
+            if (dispose)
                 await file.DisposeAsync();
 
             return model;
