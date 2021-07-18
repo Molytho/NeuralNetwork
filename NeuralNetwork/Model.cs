@@ -120,25 +120,19 @@ namespace Molytho.NeuralNetwork
         public Task SaveToFileAsync(string fileName) => SaveToFileAsync(new FileStream(fileName, FileMode.Create, FileAccess.Write), true);
         public async Task SaveToFileAsync(FileStream file, bool dispose)
         {
-            using StreamWriter writer = new StreamWriter(file);
+            using StreamWriter writer = new StreamWriter(file, leaveOpen: !dispose);
 
             string json = JsonSerializer.Serialize(this);
             await writer.WriteAsync(json).ConfigureAwait(false);
-
-            if (dispose)
-                await file.DisposeAsync().ConfigureAwait(false);
         }
         public static Task<Model> LoadFromFileAsync(string fileName) => LoadFromFileAsync(new FileStream(fileName, FileMode.Open, FileAccess.Read), true);
         public static async Task<Model> LoadFromFileAsync(FileStream file, bool dispose = false)
         {
-            using StreamReader reader = new StreamReader(file);
+            using StreamReader reader = new StreamReader(file, leaveOpen: !dispose);
 
             string json = await reader.ReadToEndAsync();
             Model model = JsonSerializer.Deserialize<Model>(json)
                 ?? throw new JsonException("json data invalid");
-
-            if (dispose)
-                await file.DisposeAsync();
 
             return model;
         }
