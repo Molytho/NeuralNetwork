@@ -7,6 +7,18 @@ string command = args.Length >= 1 ? args[0] : "help";
 Model model;
 switch (command)
 {
+    case "info":
+        if(args.Length < 2)
+        {
+            Console.WriteLine("Not enough arguments!");
+            goto case "help";
+        }
+        model = await Model.LoadFromFileAsync(args[1]);
+        Console.WriteLine("File: " + args[1]);
+        Console.WriteLine("Input size: " + model.InputSize);
+        Console.WriteLine("Output size: " + model.OutputSize);
+        Console.WriteLine("Layer count: " + model.LayerCount);
+        break;
     case "load":
         if(args.Length < 3)
         {

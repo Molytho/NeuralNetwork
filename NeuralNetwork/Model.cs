@@ -23,6 +23,9 @@ namespace Molytho.NeuralNetwork
 
         public TrainCallback? TrainFunction { get; }
         public bool IsTrainable => TrainFunction is not null;
+        public int InputSize => inSize;
+        public int OutputSize => Last?.Value.NodeCount ?? throw new InvalidOperationException();
+        public int LayerCount => layers.Count;
         public Model(int inSize, TrainCallback? trainFunc = null)
         {
             this.TrainFunction = trainFunc;
