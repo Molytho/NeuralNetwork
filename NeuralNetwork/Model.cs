@@ -21,7 +21,7 @@ namespace Molytho.NeuralNetwork
 
         private State state;
 
-        public TrainCallback? TrainFunction { get; }
+        public TrainCallback? TrainFunction { get; set;}
         public bool IsTrainable => TrainFunction is not null;
         public int InputSize => inSize;
         public int OutputSize => Last?.Value.NodeCount ?? throw new InvalidOperationException();
